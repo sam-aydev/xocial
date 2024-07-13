@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model User{
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  username  String    
+  email     String    @unique
+  password  String
+  tweets    Tweet[]  
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Tweet{
+  id        String    @id  @default(auto()) @map("_id") @db.ObjectId
+  body      String
+  createdAt DateTime  @default(now())
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String    @db.ObjectId
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Comment{
+  id        String    @id   @default(auto()) @map("_id")  @db.ObjectId
+  body      String
+  createdAt DateTime  @default(now())
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String    @db.ObjectId
+  tweet      Tweet    @relation(fields: [tweetId], references: [id])
+  tweetId    String   @db.ObjectId
+}
+
+model Like{
+  id        String    @id @default(auto())  @map("_id")   @db.ObjectId
+  author    User      @relation(fields: [authorId], references:[id])
+  authorId  String    @db.ObjectId
+  tweet      Tweet    @relation(fields: [tweetId], references: [id])
+  tweetId    String   @db.ObjectId
+}
