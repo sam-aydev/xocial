@@ -1,4 +1,3 @@
-import type { NextAuthConfig } from "next-auth";
 import NextAuth from "next-auth";
 import { PrismaClient } from "@prisma/client";
 import credentials from "next-auth/providers/credentials";
@@ -20,18 +19,18 @@ const credentialsConfig = credentials({
     try {
       const user = await prisma.user.findUnique({
         where: {
-          email: credentials.email as string,
+          email: credentials.email,
         },
       });
       if (user) {
         const isPassword = await bcrypt.compare(
-          credentials?.password as string,
-          user?.password as string
+          credentials?.password,
+          user?.password
         );
         if (!isPassword) return null;
         return user;
       }
-    } catch (error: any) {
+    } catch (error) {
       throw new Error(error);
     }
   },
@@ -40,7 +39,7 @@ const credentialsConfig = credentials({
 const config = {
   providers: [credentialsConfig],
   callbacks: {
-    authorized({ request, auth }: any) {
+    authorized({ request, auth }) {
       const { pathname } = request.nextUrl;
       if (
         pathname == "/app" ||
@@ -55,6 +54,6 @@ const config = {
   pages: {
     signIn: "/login",
   },
-} satisfies NextAuthConfig;
+};
 
 export const { handlers, auth, signIn, signOut } = NextAuth(config);
